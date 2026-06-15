@@ -3,8 +3,10 @@ import { Home, MessageSquare, UserCheck, Moon, Sun, Users } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useUI } from "./UIContext";
 
 export default function Layout() {
+  const { isOverlayOpen } = useUI();
   const { theme, setTheme } = useTheme();
   const [participantCount, setParticipantCount] = useState(0);
 
@@ -63,7 +65,7 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <nav className="fixed bottom-0 md:bottom-6 left-0 right-0 w-full md:max-w-sm mx-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-t md:border border-stone-200/50 dark:border-stone-700/50 z-50 md:rounded-full shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-2xl transition-all duration-500">
+<nav className={`fixed bottom-0 md:bottom-6 left-0 right-0 w-full md:max-w-sm mx-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-t md:border border-stone-200/50 dark:border-stone-700/50 z-50 md:rounded-full shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-2xl transition-all duration-500 ${isOverlayOpen ? 'hidden' : 'flex'}`}>
         <div className="flex justify-around items-center h-16 md:h-14 px-2">
           <NavLink to="/" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
             <Home size={22} className="mb-0.5" />
