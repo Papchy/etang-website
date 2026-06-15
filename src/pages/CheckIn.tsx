@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion"; // Ajout de Variants ici
 import { supabase } from "../lib/supabase";
-import { LogIn, LogOut, CheckCircle2, CreditCard, CalendarDays, Send, UserCheck } from "lucide-react";
+import { LogOut, CheckCircle2, CreditCard, CalendarDays, Send, UserCheck } from "lucide-react";
 
 // Ajout de ": Variants" sur ces deux constantes
 const containerVariants: Variants = {

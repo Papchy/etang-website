@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, type Variants, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
-import { Plus, MessageCircle, Heart, X, Send, Lock, Trash2, GripHorizontal, MousePointerClick } from "lucide-react";
+import { MessageCircle, Heart, X, Send, Lock, Trash2, GripHorizontal, MousePointerClick } from "lucide-react";
 
 interface Post {
   id_post: number;
