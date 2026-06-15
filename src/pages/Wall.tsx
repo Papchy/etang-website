@@ -45,6 +45,18 @@ export default function Wall() {
   const [authorsMap, setAuthorsMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const navBar = document.querySelector('nav');
+    
+    if (navBar) {
+      if (isComposeOpen || selectedPost) {
+        navBar.style.display = 'none';
+      } else {
+        navBar.style.display = 'flex'; // ou 'block' selon ton CSS initial
+      }
+    }
+  }, [isComposeOpen, selectedPost]);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
 
     const fetchInitialData = async () => {
