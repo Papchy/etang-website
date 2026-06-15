@@ -1,9 +1,22 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./components/ThemeProvider";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Wall from "./pages/Wall";
+import CheckIn from "./pages/CheckIn";
+
 export default function App() {
   return (
-    <div className="min-h-screen bg-stone-100 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-stone-800">
-        Soirée à l'Étang
-      </h1>
-    </div>
-  )
+    <ThemeProvider defaultTheme="system">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="wall" element={<Wall />} />
+            <Route path="checkin" element={<CheckIn />} />
+          </Route>
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
 }
