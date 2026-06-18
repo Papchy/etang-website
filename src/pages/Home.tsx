@@ -1,6 +1,7 @@
 import { MapPin, Calendar, Tent, Camera, Navigation, Car, AlertCircle } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import WeatherWidget from "../components/WeatherWidget";
+import CountdownWidget from "../components/CountdownWidget";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -47,8 +48,9 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* WIDGET MÉTÉO - Pleine largeur sous l'image */}
-      <motion.div variants={itemVariants} className="px-5 md:px-8">
+      {/* ZONE WIDGETS - Pleine largeur sous l'image */}
+      <motion.div variants={itemVariants} className="px-5 md:px-8 flex flex-col gap-4">
+        <CountdownWidget />
         <WeatherWidget />
       </motion.div>
 

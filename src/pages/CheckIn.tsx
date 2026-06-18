@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { supabase } from "../lib/supabase";
-import { LogOut, CheckCircle2, CreditCard, CalendarDays, Send, Edit3, X, Receipt, Lock, Mail, Key, User } from "lucide-react";
+import { LogOut, CheckCircle2, CreditCard, CalendarDays, Send, Edit3, X, Receipt, Lock, Mail, Key, User, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -23,6 +24,7 @@ export default function CheckIn() {
   const [hasRegistered, setHasRegistered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // Bien placé à l'intérieur du composant
 
   // Champs du formulaire de Check-in
   const [presence, setPresence] = useState("Tout le week-end");
@@ -37,6 +39,7 @@ export default function CheckIn() {
   const [authError, setAuthError] = useState("");
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
+  // 1er useEffect : Gérer la session utilisateur (Connexion/Déconnexion)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -51,7 +54,7 @@ export default function CheckIn() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Gestion de la synchronisation immédiate du profil à la connexion
+  // 2ème useEffect : Gestion de la synchronisation immédiate du profil à la connexion
   useEffect(() => {
     if (!session) return;
 
@@ -93,12 +96,18 @@ export default function CheckIn() {
         participantData = insertedData;
       }
 
-      // Si le participant a déjà renseigné sa présence, on l'envoie vers l'écran résumé
-      if (participantData && participantData.jours_presence) {
-        setPresence(participantData.jours_presence);
-        setHasRegistered(true);
-      } else {
-        setHasRegistered(false);
+      // Analyse des données du participant
+      if (participantData) {
+        // Gérer l'affichage de la présence
+        if (participantData.jours_presence) {
+          setPresence(participantData.jours_presence);
+          setHasRegistered(true);
+        } else {
+          setHasRegistered(false);
+        }
+        
+        // Gérer le statut administrateur
+        setIsAdmin(participantData.is_admin || false);
       }
 
       // 2. On récupère le paiement associé s'il existe
@@ -173,6 +182,7 @@ export default function CheckIn() {
     await supabase.auth.signOut();
     setHasRegistered(false);
     setIsEditing(false);
+    setIsAdmin(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -335,6 +345,16 @@ export default function CheckIn() {
               <LogOut size={20} />
             </button>
           </div>
+
+          {/* Bouton Admin visible uniquement si is_admin est true */}
+          {isAdmin && (
+            <Link 
+              to="/admin"
+              className="flex items-center justify-center gap-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold py-3 px-4 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-200 transition-all text-sm"
+            >
+              <Shield size={16} className="text-amber-500" /> Accéder au panneau d'administration
+            </Link>
+          )}
 
           {hasRegistered && !isEditing ? (
             // ÉCRAN DE RÉSUMÉ
