@@ -271,7 +271,7 @@ export default function Wall() {
         dragConstraints={{ left: -3000 + window.innerWidth, right: 0, top: -3000 + window.innerHeight, bottom: 0 }}
         initial={{ x: -1500 + window.innerWidth / 2, y: -1500 + window.innerHeight / 2 }}
         className="absolute w-[3000px] h-[3000px] cursor-grab active:cursor-grabbing"
-        style={{ backgroundImage: "url('/liege.jpg')", backgroundRepeat: 'repeat', backgroundSize: '400px' }}
+        style={{ backgroundImage: "url('/liege.png')", backgroundRepeat: 'repeat', backgroundSize: '400px' }}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
       >
