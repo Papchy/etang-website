@@ -39,7 +39,7 @@ export default function InteractiveMap() {
       left: "45%", 
       icon: <Car size={18} />,
       title: "Parking",
-      description: "Garez-vous le long de ce chemin en file indienne pour ne pas bloquer l'accès aux véhicules de secours.",
+      description: "Garez-vous le long de ce chemin en file indienne.",
       color: "bg-stone-500"
     }
   ];
@@ -103,13 +103,6 @@ export default function InteractiveMap() {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* Instructions */}
-      {!activePin && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-stone-900/80 backdrop-blur-sm text-white px-4 py-2 rounded-full text-xs font-bold pointer-events-none tracking-wide">
-          Touchez les icônes pour explorer
-        </div>
-      )}
     </div>
   );
 }
