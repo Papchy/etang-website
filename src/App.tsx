@@ -7,6 +7,7 @@ import CheckIn from "./pages/CheckIn";
 import Admin from "./pages/Admin";
 import ShoppingList from "./pages/ShoppingList";
 import Guests from "./pages/Guests";
+import Peche from "./pages/Peche";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/guests" element={<Guests />} />
             <Route path="/shopping" element={<ShoppingList />} />
             <Route path="admin" element={<Admin />} />
+            <Route path="/peche" element={<Peche />} />
           </Route>
         </Routes>
       </Router>

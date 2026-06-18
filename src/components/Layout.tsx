@@ -65,41 +65,43 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <nav 
-        className={`fixed bottom-0 md:bottom-6 left-0 right-0 z-50 transition-all duration-500 ${
-          isOverlayOpen ? 'hidden' : 'flex'
-        }`}
-      >
-        {/* La pilule centrée */}
-        <div className="w-full md:max-w-md mx-4 md:mx-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-t md:border border-stone-200/50 dark:border-stone-700/50 rounded-t-2xl md:rounded-full shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-2xl">
-          <div className="flex justify-around items-center h-16 md:h-14 px-2">
-            <NavLink to="/" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
-              <Home size={22} className="mb-0.5" />
-              <span>Infos</span>
-            </NavLink>
-            
-            <NavLink to="/wall" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
-              <MessageSquare size={22} className="mb-0.5" />
-              <span>Le Mur</span>
-            </NavLink>
+<nav className={`fixed bottom-0 md:bottom-6 left-0 right-0 z-50 transition-all duration-500 ${isOverlayOpen ? 'hidden' : 'flex'}`}>
+  <div className="w-full md:max-w-2xl mx-4 md:mx-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-t md:border border-stone-200/50 dark:border-stone-700/50 rounded-t-2xl md:rounded-full shadow-2xl">
+    <div className="flex justify-around items-center h-16 md:h-16 px-2">
+      
+      {/* Infos */}
+      <NavLink to="/" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
+        <Home size={20} className="mb-0.5" /> <span>Infos</span>
+      </NavLink>
+      
+      {/* Le Mur */}
+      <NavLink to="/wall" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
+        <MessageSquare size={20} className="mb-0.5" /> <span>Mur</span>
+      </NavLink>
 
-            <NavLink to="/guests" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
-              <Users size={22} className="mb-0.5" />
-              <span>Invités</span>
-            </NavLink>
+      {/* Invités (Trombinoscope) */}
+      <NavLink to="/guests" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
+        <Users size={20} className="mb-0.5" /> <span>Invités</span>
+      </NavLink>
 
-            <NavLink to="/shopping" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
-              <ShoppingBasket size={22} className="mb-0.5" />
-              <span>Listes</span>
-            </NavLink>
+      {/* Pêche */}
+      <NavLink to="/peche" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
+        <Fish size={20} className="mb-0.5" /> <span>Pêche</span>
+      </NavLink>
 
-            <NavLink to="/checkin" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
-              <UserCheck size={22} className="mb-0.5" />
-              <span>Check-in</span>
-            </NavLink>
-          </div>
-        </div>
-      </nav>
+      {/* Listes */}
+      <NavLink to="/shopping" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
+        <ShoppingBasket size={20} className="mb-0.5" /> <span>Listes</span>
+      </NavLink>
+
+      {/* Check-in */}
+      <NavLink to="/checkin" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
+        <UserCheck size={20} className="mb-0.5" /> <span>Profil</span>
+      </NavLink>
+
+    </div>
+  </div>
+</nav>
     </div>
   );
 }
