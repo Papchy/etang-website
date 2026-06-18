@@ -88,6 +88,11 @@ export default function Layout() {
         <span>Invités</span>
       </NavLink>
 
+      <NavLink to="/shopping" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
+        <ShoppingBasket size={22} className="mb-0.5" />
+        <span>Listes</span>
+      </NavLink>
+
       <NavLink to="/checkin" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
         <UserCheck size={22} className="mb-0.5" />
         <span>Check-in</span>

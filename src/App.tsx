@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Wall from "./pages/Wall";
 import CheckIn from "./pages/CheckIn";
 import Admin from "./pages/Admin";
+import ShoppingList from "./pages/ShoppingList";
 import Guests from "./pages/Guests";
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
             <Route path="wall" element={<Wall />} />
             <Route path="checkin" element={<CheckIn />} />
             <Route path="/guests" element={<Guests />} />
+            <Route path="/shopping" element={<ShoppingList />} />
             <Route path="admin" element={<Admin />} />
           </Route>
         </Routes>
