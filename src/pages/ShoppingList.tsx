@@ -125,7 +125,7 @@ export default function ShoppingList() {
               <span className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600 dark:text-emerald-400"><ShoppingBasket size={24} /></span>
               <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Les Essentiels</h2>
             </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-6">Nourriture, boissons, logistique. Financé par la cagnotte des 10€.</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-6">Nourriture, boissons, logistique. Financé par la cagnotte par exemple les 10€.</p>
 
             {session && (
               <form onSubmit={(e) => handleAddItem(e, 'Sérieux')} className="flex gap-2 mb-6">
@@ -178,7 +178,7 @@ export default function ShoppingList() {
               <span className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600 dark:text-purple-400"><Sparkles size={24} /></span>
               <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Le Fun & Bonus</h2>
             </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-6">Bouées, jeux de cartes, déco. Acheté avec le budget de l'organisation.</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-6">Bouées, jeux de cartes, déco. Acheté avec le budget de l'organisation (le PEA d'Hippolyte).</p>
 
             {session && (
               <form onSubmit={(e) => handleAddItem(e, 'Fun')} className="flex gap-2 mb-6">
