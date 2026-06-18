@@ -30,7 +30,7 @@ export default function CheckIn() {
   const [methode, setMethode] = useState("Lydia");
 
   // États pour l'authentification par email
-  const [authName, setAuthName] = useState(""); // Nouveau champ pour le nom
+  const [authName, setAuthName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
@@ -51,23 +51,57 @@ export default function CheckIn() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Gestion de la synchronisation immédiate du profil à la connexion
   useEffect(() => {
     if (!session) return;
 
-    const fetchUserData = async () => {
+    const fetchAndPrepareUserData = async () => {
       const email = session.user.email;
+      const baseName = session.user.user_metadata?.full_name || email.split('@')[0];
+      
+      let prenom = baseName;
+      let nom = "";
+      if (baseName.includes(' ')) {
+        const nameParts = baseName.split(' ');
+        prenom = nameParts[0];
+        nom = nameParts.slice(1).join(' ');
+      }
 
-      const { data: participantData } = await supabase
+      // 1. On cherche si la ligne existe dans participants
+      let { data: participantData } = await supabase
         .from('participants')
         .select('*')
         .eq('email', email)
         .maybeSingle();
 
-      if (participantData) {
-        setPresence(participantData.jours_presence || "Tout le week-end");
-        setHasRegistered(true);
+      // S'il n'existe pas du tout, on crée immédiatement sa ligne "fantôme" (sans présence)
+      if (!participantData) {
+        const avatarUrl = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prenom)}&backgroundColor=e7e5e4&textColor=1c1917`;
+        
+        const { data: insertedData } = await supabase
+          .from('participants')
+          .insert({
+            email: email,
+            prenom: prenom,
+            nom: nom,
+            jours_presence: null, // Reste null tant qu'il n'a pas validé le formulaire
+            avatar_url: avatarUrl
+          })
+          .select()
+          .single();
+        
+        participantData = insertedData;
       }
 
+      // Si le participant a déjà renseigné sa présence, on l'envoie vers l'écran résumé
+      if (participantData && participantData.jours_presence) {
+        setPresence(participantData.jours_presence);
+        setHasRegistered(true);
+      } else {
+        setHasRegistered(false);
+      }
+
+      // 2. On récupère le paiement associé s'il existe
       const { data: paiementData } = await supabase
         .from('paiements')
         .select('*')
@@ -83,7 +117,7 @@ export default function CheckIn() {
       setLoading(false);
     };
 
-    fetchUserData();
+    fetchAndPrepareUserData();
   }, [session]);
 
   const handleGoogleLogin = async () => {
@@ -100,7 +134,6 @@ export default function CheckIn() {
 
     try {
       if (isSignUp) {
-        // Création d'un avatar automatique basé sur le nom saisi
         const generatedAvatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authName)}&backgroundColor=e7e5e4&textColor=1c1917`;
         
         const { error } = await supabase.auth.signUp({
@@ -149,46 +182,25 @@ export default function CheckIn() {
 
     try {
       const email = session.user.email;
-      // On récupère le nom depuis les métadonnées (qui viennent soit de Google, soit de notre formulaire d'inscription manuel)
-      const baseName = session.user.user_metadata?.full_name || email.split('@')[0];
-      const avatarUrl = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${baseName}&backgroundColor=e7e5e4&textColor=1c1917`;
-      
-      let prenom = baseName;
-      let nom = "";
-      if (baseName.includes(' ')) {
-        const nameParts = baseName.split(' ');
-        prenom = nameParts[0];
-        nom = nameParts.slice(1).join(' ');
-      }
 
-      const { data: existingParticipant } = await supabase.from('participants').select('*').eq('email', email).maybeSingle();
-      
-      if (existingParticipant) {
-        await supabase.from('participants').update({
-          prenom: prenom, nom: nom, jours_presence: presence, avatar_url: avatarUrl
-        }).eq('email', email);
-      } else {
-        await supabase.from('participants').insert({
-          email: email, prenom: prenom, nom: nom, jours_presence: presence, avatar_url: avatarUrl
-        });
-      }
+      // 1. Mise à jour de la présence dans la table participants (la ligne existe déjà forcément)
+      await supabase
+        .from('participants')
+        .update({ jours_presence: presence })
+        .eq('email', email);
 
-      const { data: existingPaiement } = await supabase.from('paiements').select('*').eq('email', email).maybeSingle();
-
+      // 2. Gestion unique de la table paiements via UPSERT
       if (presence === "Je ne viens pas" || montant === "0" || montant === "") {
-        if (existingPaiement) {
-          await supabase.from('paiements').delete().eq('email', email);
-        }
+        // Si l'utilisateur choisit finalement de ne pas venir, on nettoie son paiement
+        await supabase.from('paiements').delete().eq('email', email);
       } else {
-        if (existingPaiement) {
-          await supabase.from('paiements').update({
-            montant: parseFloat(montant), methode: methode
-          }).eq('email', email);
-        } else {
-          await supabase.from('paiements').insert({
-            email: email, montant: parseFloat(montant), methode: methode, statut: 'En attente'
-          });
-        }
+        // Grâce à la contrainte d'unicité, l'upsert va écraser la ligne existante sans créer de doublon
+        await supabase.from('paiements').upsert({
+          email: email,
+          montant: parseFloat(montant),
+          methode: methode,
+          statut: 'En attente'
+        }, { onConflict: 'email' });
       }
 
       setSuccess(true);
