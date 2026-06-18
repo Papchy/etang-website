@@ -9,6 +9,10 @@ interface Participant {
   nom: string;
   jours_presence: string;
   avatar_url: string;
+  badge_peche: boolean;
+  badge_apero: boolean;
+  badge_bbq: boolean;
+  badge_musique: boolean;
 }
 
 const containerVariants: Variants = {
@@ -23,22 +27,41 @@ const itemVariants: Variants = {
 
 export default function Guests() {
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [topDonators, setTopDonators] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGuests = async () => {
-      const { data } = await supabase
+    const fetchGuestsData = async () => {
+      // 1. Récupération des participants avec leurs badges
+      const { data: partData } = await supabase
         .from('participants')
         .select('*')
         .not('jours_presence', 'is', null)
         .neq('jours_presence', 'Je ne viens pas')
         .order('prenom', { ascending: true });
         
-      if (data) setParticipants(data);
+      if (partData) setParticipants(partData);
+
+      // 2. Calcul automatique du/des plus gros donateurs
+      const { data: paiementsData } = await supabase.from('paiements').select('email, montant');
+      
+      if (paiementsData && paiementsData.length > 0) {
+        let maxMontant = 0;
+        paiementsData.forEach(p => {
+          if (p.montant > maxMontant) maxMontant = p.montant;
+        });
+        
+        if (maxMontant > 0) {
+          // On prend tous ceux qui ont donné ce montant max (s'il y a égalité)
+          const tops = paiementsData.filter(p => p.montant === maxMontant).map(p => p.email);
+          setTopDonators(tops);
+        }
+      }
+
       setLoading(false);
     };
 
-    fetchGuests();
+    fetchGuestsData();
   }, []);
 
   const getPresenceIcon = (presence: string) => {
@@ -70,8 +93,19 @@ export default function Guests() {
 
       <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {participants.map((p) => (
-          <div key={p.email} className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-stone-200/50 dark:border-stone-800 flex flex-col items-center text-center transition-all hover:shadow-md hover:-translate-y-1">
-            <div className="w-16 h-16 mb-3 rounded-full overflow-hidden border-2 border-stone-100 dark:border-stone-800 shadow-inner">
+          <div key={p.email} className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-stone-200/50 dark:border-stone-800 flex flex-col items-center text-center transition-all hover:shadow-md hover:-translate-y-1 relative">
+            
+            {/* Si l'utilisateur est le plus gros donateur, il a une couronne en haut à droite */}
+            {topDonators.includes(p.email) && (
+              <div 
+                className="absolute -top-2 -right-2 bg-gradient-to-br from-amber-300 to-amber-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-stone-900 text-lg z-10"
+                title="Plus gros Mécène du week-end"
+              >
+                👑
+              </div>
+            )}
+
+            <div className="w-16 h-16 mb-3 rounded-full overflow-hidden border-2 border-stone-100 dark:border-stone-800 shadow-inner relative">
               <img 
                 src={p.avatar_url} 
                 alt={p.prenom} 
@@ -79,13 +113,24 @@ export default function Guests() {
                 referrerPolicy="no-referrer"
               />
             </div>
+            
             <h3 className="font-bold text-stone-800 dark:text-stone-100 leading-tight">
               {p.prenom} {p.nom ? p.nom.charAt(0) + '.' : ''}
             </h3>
-            <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase tracking-wide bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded-md">
+            
+            <div className="mt-2 mb-3 flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase tracking-wide bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded-md">
               {getPresenceIcon(p.jours_presence)}
               <span className="truncate">{p.jours_presence === "Tout le week-end" ? "Week-end" : p.jours_presence === "Juste Samedi soir" ? "Samedi Soir" : "Sam & Dim"}</span>
             </div>
+
+            {/* Affichage des badges d'envies */}
+            <div className="flex gap-1.5 flex-wrap justify-center mt-auto h-6">
+              {p.badge_peche && <span className="text-lg" title="Prêt à pêcher">🎣</span>}
+              {p.badge_apero && <span className="text-lg" title="Pilier de comptoir">🍻</span>}
+              {p.badge_bbq && <span className="text-lg" title="Maître du feu">🥩</span>}
+              {p.badge_musique && <span className="text-lg" title="A envie de chanter">🎤</span>}
+            </div>
+
           </div>
         ))}
       </motion.div>
