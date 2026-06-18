@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { Home, MessageSquare, UserCheck, Moon, Sun, Users } from "lucide-react";
+import { Home, MessageSquare, UserCheck, Moon, Sun, Users} from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
@@ -81,6 +81,11 @@ export default function Layout() {
       <NavLink to="/wall" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
         <MessageSquare size={22} className="mb-0.5" />
         <span>Le Mur</span>
+      </NavLink>
+
+      <NavLink to="/guests" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>
+        <Users size={22} className="mb-0.5" />
+        <span>Invités</span>
       </NavLink>
 
       <NavLink to="/checkin" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[10px] md:text-xs transition-all duration-300 ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold scale-110' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:scale-105'}`}>

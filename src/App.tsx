@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Wall from "./pages/Wall";
 import CheckIn from "./pages/CheckIn";
 import Admin from "./pages/Admin";
+import Guests from "./pages/Guests";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="wall" element={<Wall />} />
             <Route path="checkin" element={<CheckIn />} />
+            <Route path="/guests" element={<Guests />} />
             <Route path="admin" element={<Admin />} />
           </Route>
         </Routes>

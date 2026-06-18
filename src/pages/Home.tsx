@@ -1,7 +1,8 @@
-import { MapPin, Calendar, Tent, Camera, Navigation, Car, AlertCircle } from "lucide-react";
+import { MapPin, Calendar, Tent, Camera, Navigation, Car, AlertCircle, Map } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import WeatherWidget from "../components/WeatherWidget";
 import CountdownWidget from "../components/CountdownWidget";
+import InteractiveMap from "../components/InteractiveMap"; // Ajout de l'import
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -125,8 +126,8 @@ export default function Home() {
             className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-3xl p-6 shadow-sm hover:shadow-xl border border-white/40 dark:border-stone-700/40 transition-all duration-500 flex-1"
           >
             <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6 flex items-center gap-3">
-              <span className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl"><Car size={24} className="text-amber-600 dark:text-amber-400" /></span>
-              Accès & Parking
+              <span className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl"><Map size={24} className="text-amber-600 dark:text-amber-400" /></span>
+              Accès & Plan du site
             </h2>
             
             <div className="space-y-6">
@@ -153,23 +154,10 @@ export default function Home() {
                 </a>
               </div>
 
+              {/* CARTE INTERACTIVE */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-bold text-stone-800 dark:text-stone-300 uppercase tracking-wider">Plan du parking</h3>
-                <div className="flex flex-col rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-stone-900 border border-stone-200/50 dark:border-stone-700/50 hover:border-amber-300 dark:hover:border-amber-600/50 transition-colors duration-300">
-                  <div className="h-48 md:h-56 w-full overflow-hidden relative">
-                    <img 
-                      src="/zoom-parking.png" 
-                      alt="Zoom sur la zone de parking" 
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000 ease-out dark:opacity-80"
-                    />
-                  </div>
-                  <div className="bg-amber-50/80 dark:bg-amber-950/30 text-stone-800 dark:text-stone-300 text-xs md:text-sm font-medium p-3 md:p-4 flex items-start gap-3 border-t border-amber-100/50 dark:border-amber-900/30">
-                    <AlertCircle size={20} className="text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                    <p className="leading-relaxed">
-                      Merci de vous garer dans la zone indiquée sur cette carte pour ne pas bloquer les chemins d'accès.
-                    </p>
-                  </div>
-                </div>
+                <h3 className="text-sm font-bold text-stone-800 dark:text-stone-300 uppercase tracking-wider">Carte Interactive</h3>
+                <InteractiveMap />
               </div>
             </div>
           </motion.section>
