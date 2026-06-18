@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { motion, Variants, AnimatePresence } from "framer-motion";
+import { motion, type Variants, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
 import { MessageCircle, Heart, X, Send, Lock, Trash2, GripHorizontal, MousePointerClick, ImagePlus, Loader2 } from "lucide-react";
 

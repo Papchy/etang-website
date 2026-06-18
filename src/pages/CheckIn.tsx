@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { supabase } from "../lib/supabase";
 import { LogOut, CheckCircle2, CreditCard, CalendarDays, Send, Edit3, X, Receipt, Lock, Mail, Key } from "lucide-react";
 
