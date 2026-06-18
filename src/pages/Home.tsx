@@ -20,6 +20,7 @@ export default function Home() {
       animate="show"
       className="flex flex-col gap-6 md:gap-8 pb-8"
     >
+      {/* IMAGE PRINCIPALE */}
       <motion.div variants={itemVariants} className="group relative h-72 md:h-96 md:rounded-[2rem] rounded-b-[2rem] overflow-hidden shadow-2xl md:mx-4 mt-0 md:mt-4">
         <img 
           src="etang_front.jpg" 
@@ -46,41 +47,51 @@ export default function Home() {
         </div>
       </motion.div>
 
-      <div className="px-5 md:px-8 flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-8">
+      {/* WIDGET MÉTÉO - Pleine largeur sous l'image */}
+      <motion.div variants={itemVariants} className="px-5 md:px-8">
         <WeatherWidget />
-        <motion.section 
-          variants={itemVariants}
-          className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl border border-white/40 dark:border-stone-700/40 transition-all duration-500 flex flex-col"
-        >
-          <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6 flex items-center gap-3">
-            <span className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl"><Calendar size={24} className="text-amber-600 dark:text-amber-400" /></span>
-            Le Programme
-          </h2>
-          <div className="text-sm md:text-base text-stone-600 dark:text-stone-300 space-y-5 flex-1">
-            <p className="leading-relaxed">
-              <strong className="text-stone-800 dark:text-stone-100">Organisation :</strong> Arrivée à partir de l'heure que vous voulez le samedi 11 juillet. Départ quand vous le souhaitez le dimanche, ou même le lundi.
-            </p>
-            <p className="leading-relaxed">
-              <strong className="text-stone-800 dark:text-stone-100">Au menu :</strong> Grand barbecue le samedi soir et tireuse. Un Aldi est ouvert le dimanche matin à quelques minutes en voiture.
-            </p>
-            <p className="leading-relaxed">
-              <strong className="text-stone-800 dark:text-stone-100">Sur place :</strong> Électricité, toilettes, de l'espace, et on va essayer de monter un truc stylé (tyrolienne ou autre).
-            </p>
-            
-            <div className="bg-gradient-to-br from-emerald-50 to-stone-50 dark:from-stone-800 dark:to-stone-800 border border-emerald-100/50 dark:border-stone-700 p-5 rounded-2xl mt-6 text-stone-700 dark:text-stone-300 shadow-inner">
-              <span className="font-bold mb-3 flex items-center gap-2 text-emerald-800 dark:text-emerald-400 text-base">
-                <Tent size={20} /> À prévoir dans les sacs
-              </span>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Tente & duvet</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Maillot de bain</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Anti-moustique</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Sièges/Tables camping</li>
-              </ul>
-            </div>
-          </div>
-        </motion.section>
+      </motion.div>
 
+      {/* GRILLE 2 COLONNES (Programme à gauche / Reste à droite) */}
+      <div className="px-5 md:px-8 flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-8">
+        
+        {/* COLONNE DE GAUCHE */}
+        <div className="flex flex-col gap-6 md:gap-8">
+          <motion.section 
+            variants={itemVariants}
+            className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl border border-white/40 dark:border-stone-700/40 transition-all duration-500 flex flex-col h-full"
+          >
+            <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6 flex items-center gap-3">
+              <span className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl"><Calendar size={24} className="text-amber-600 dark:text-amber-400" /></span>
+              Le Programme
+            </h2>
+            <div className="text-sm md:text-base text-stone-600 dark:text-stone-300 space-y-5 flex-1">
+              <p className="leading-relaxed">
+                <strong className="text-stone-800 dark:text-stone-100">Organisation :</strong> Arrivée à partir de l'heure que vous voulez le samedi 11 juillet. Départ quand vous le souhaitez le dimanche, ou même le lundi.
+              </p>
+              <p className="leading-relaxed">
+                <strong className="text-stone-800 dark:text-stone-100">Au menu :</strong> Grand barbecue le samedi soir et tireuse. Un Aldi est ouvert le dimanche matin à quelques minutes en voiture.
+              </p>
+              <p className="leading-relaxed">
+                <strong className="text-stone-800 dark:text-stone-100">Sur place :</strong> Électricité, toilettes, de l'espace, et on va essayer de monter un truc stylé (tyrolienne ou autre).
+              </p>
+              
+              <div className="bg-gradient-to-br from-emerald-50 to-stone-50 dark:from-stone-800 dark:to-stone-800 border border-emerald-100/50 dark:border-stone-700 p-5 rounded-2xl mt-6 text-stone-700 dark:text-stone-300 shadow-inner">
+                <span className="font-bold mb-3 flex items-center gap-2 text-emerald-800 dark:text-emerald-400 text-base">
+                  <Tent size={20} /> À prévoir dans les sacs
+                </span>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Tente & duvet</li>
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Maillot de bain</li>
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Anti-moustique</li>
+                  <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400"/> Sièges/Tables camping</li>
+                </ul>
+              </div>
+            </div>
+          </motion.section>
+        </div>
+
+        {/* COLONNE DE DROITE */}
         <div className="flex flex-col gap-6 md:gap-8">
           
           <motion.a 
