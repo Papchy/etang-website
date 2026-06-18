@@ -84,10 +84,11 @@ export default function Layout() {
         <Users size={20} className="mb-0.5" /> <span>Invités</span>
       </NavLink>
 
-      {/* Pêche */}
+      {/* Pêche 
       <NavLink to="/peche" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
         <Fish size={20} className="mb-0.5" /> <span>Pêche</span>
       </NavLink>
+      */}
 
       {/* Listes */}
       <NavLink to="/shopping" className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full text-[9px] md:text-xs transition-all ${isActive ? 'text-amber-600 dark:text-amber-500 font-bold' : 'text-stone-500 dark:text-stone-400'}`}>
