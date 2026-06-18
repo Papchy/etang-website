@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { motion, type Variants, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
-import { MessageCircle, Heart, X, Send, Lock, Trash2, GripHorizontal, MousePointerClick } from "lucide-react";
+import { MessageCircle, Heart, X, Send, Lock, Trash2, GripHorizontal, MousePointerClick, ImagePlus, Loader2 } from "lucide-react";
 
 interface Post {
   id_post: number;
@@ -12,6 +12,7 @@ interface Post {
   likes: string[];
   position_x: number;
   position_y: number;
+  image_url?: string;
 }
 
 interface Comment {
@@ -41,20 +42,13 @@ export default function Wall() {
   const [newPostContent, setNewPostContent] = useState("");
   const [newPostCategory, setNewPostCategory] = useState("Fun");
   const [newCommentContent, setNewCommentContent] = useState("");
+  
+  // Nouveaux états pour l'image
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [authorsMap, setAuthorsMap] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    const navBar = document.querySelector('nav');
-    
-    if (navBar) {
-      if (isComposeOpen || selectedPost) {
-        navBar.style.display = 'none';
-      } else {
-        navBar.style.display = 'flex'; // ou 'block' selon ton CSS initial
-      }
-    }
-  }, [isComposeOpen, selectedPost]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
@@ -107,18 +101,25 @@ export default function Wall() {
     };
   }, [selectedPost]);
 
+  // Masquer la barre de navigation quand une modale est ouverte
+  useEffect(() => {
+    const navBar = document.querySelector('nav');
+    if (navBar) {
+      if (isComposeOpen || selectedPost) {
+        navBar.style.display = 'none';
+      } else {
+        navBar.style.display = 'flex';
+      }
+    }
+  }, [isComposeOpen, selectedPost]);
+
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Si une modale est ouverte, on ignore totalement le clic sur le mur
     if (isComposeOpen || selectedPost) return;
-    
     setDragStartPos({ x: e.clientX, y: e.clientY });
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Si une modale est ouverte, on ignore
     if (isComposeOpen || selectedPost) return;
-
-    // SÉCURITÉ : Si l'élément cliqué (ou un de ses parents) possède la classe "post-it-element", on annule l'ajout
     if ((e.target as Element).closest('.post-it-element')) return;
 
     const distance = Math.sqrt(Math.pow(e.clientX - dragStartPos.x, 2) + Math.pow(e.clientY - dragStartPos.y, 2));
@@ -131,26 +132,56 @@ export default function Wall() {
     }
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session || !newPostContent.trim()) return;
+    if (!session || (!newPostContent.trim() && !imageFile)) return;
+    
+    setIsUploading(true);
+    let imageUrl = null;
+
+    // 1. Gérer l'upload de l'image si elle existe
+    if (imageFile) {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('post_images')
+        .upload(fileName, imageFile);
+
+      if (!uploadError) {
+        const { data } = supabase.storage.from('post_images').getPublicUrl(fileName);
+        imageUrl = data.publicUrl;
+      } else {
+        console.error("Erreur d'upload", uploadError);
+      }
+    }
 
     const finalX = newPostPosition ? newPostPosition.x - 80 : 1500;
     const finalY = newPostPosition ? newPostPosition.y - 80 : 1500;
 
+    // 2. Insérer le post dans la base de données
     const { data } = await supabase.from('deplacement_posts').insert({
       email_auteur: session.user.email,
       categorie: newPostCategory,
       contenu: newPostContent,
       position_x: finalX,
-      position_y: finalY
+      position_y: finalY,
+      image_url: imageUrl
     }).select().single();
 
     if (data) {
       setPosts(prev => [...prev, data]);
     }
 
+    // Réinitialisation du formulaire
     setNewPostContent("");
+    setImageFile(null);
+    setIsUploading(false);
     setIsComposeOpen(false);
     setNewPostPosition(null);
   };
@@ -176,6 +207,7 @@ export default function Wall() {
     setPosts(prev => prev.filter(p => p.id_post !== idPost));
     setSelectedPost(null);
     await supabase.from('deplacement_posts').delete().eq('id_post', idPost);
+    // Note: On pourrait aussi supprimer l'image du bucket ici pour nettoyer le stockage
   };
 
   const handleDeleteComment = async (idCommentaire: number) => {
@@ -201,14 +233,6 @@ export default function Wall() {
     }
 
     await supabase.from('deplacement_posts').update({ likes: newLikes }).eq('id_post', post.id_post);
-  };
-
-  const handleDragEnd = async (post: Post, offset: { x: number, y: number }) => {
-    const newX = Math.round(post.position_x + offset.x);
-    const newY = Math.round(post.position_y + offset.y);
-    
-    setPosts(prev => prev.map(p => p.id_post === post.id_post ? { ...p, position_x: newX, position_y: newY } : p));
-    await supabase.from('deplacement_posts').update({ position_x: newX, position_y: newY }).eq('id_post', post.id_post);
   };
 
   const getCategoryStyles = (category: string) => {
@@ -247,7 +271,7 @@ export default function Wall() {
         dragConstraints={{ left: -3000 + window.innerWidth, right: 0, top: -3000 + window.innerHeight, bottom: 0 }}
         initial={{ x: -1500 + window.innerWidth / 2, y: -1500 + window.innerHeight / 2 }}
         className="absolute w-[3000px] h-[3000px] cursor-grab active:cursor-grabbing"
-        style={{ backgroundImage: "url('/liege.png')", backgroundRepeat: 'repeat', backgroundSize: '400px' }}
+        style={{ backgroundImage: "url('/liege.jpg')", backgroundRepeat: 'repeat', backgroundSize: '400px' }}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
       >
@@ -256,29 +280,30 @@ export default function Wall() {
             key={post.id_post} 
             initial={{ x: post.position_x, y: post.position_y }}
             animate={{ x: post.position_x, y: post.position_y }}
-            drag
-            dragMomentum={false}
-            onDragStart={(e) => e.stopPropagation()}
-            onDragEnd={(_e, info) => handleDragEnd(post, info.offset)}
             onClick={(e) => {
               e.stopPropagation();
               setSelectedPost(post);
             }}
-            // AJOUT DE LA CLASSE ICI ("post-it-element")
             className={`post-it-element absolute top-0 left-0 w-40 md:w-48 h-40 md:h-48 p-4 rounded-sm shadow-xl hover:shadow-2xl hover:scale-105 transition-all cursor-pointer flex flex-col group/post ${getCategoryStyles(post.categorie)} ${getRotation(index)}`}
           >
             {getDecoration(index, post.categorie)}
             
-            <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center justify-between mt-1 shrink-0">
               <div className="text-[10px] font-bold opacity-50 uppercase tracking-widest">{post.categorie}</div>
-              <GripHorizontal size={14} className="opacity-0 group-hover/post:opacity-30 transition-opacity" />
             </div>
             
-            <p className="flex-1 mt-2 text-sm font-medium overflow-hidden text-ellipsis whitespace-pre-wrap leading-tight text-stone-900">
+            {/* Affichage de l'image miniature */}
+            {post.image_url && (
+              <div className="w-full h-16 mt-1 mb-1 rounded overflow-hidden shrink-0 border border-black/10">
+                <img src={post.image_url} alt="Contenu post-it" className="w-full h-full object-cover" />
+              </div>
+            )}
+            
+            <p className={`flex-1 mt-1 text-sm font-medium overflow-hidden text-ellipsis leading-tight text-stone-900 ${post.image_url ? 'line-clamp-2' : ''}`}>
               {post.contenu}
             </p>
             
-            <div className="mt-2 flex items-center justify-between text-[10px] font-bold opacity-75 border-t border-black/10 pt-2 pointer-events-none text-stone-900">
+            <div className="mt-2 flex items-center justify-between text-[10px] font-bold opacity-75 border-t border-black/10 pt-2 pointer-events-none text-stone-900 shrink-0">
               <span>{authorsMap[post.email_auteur] || "Inconnu"}</span>
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-0.5">
@@ -292,10 +317,11 @@ export default function Wall() {
         ))}
       </motion.div>
 
+      {/* MODALE : Créer un Post-it */}
       <AnimatePresence>
         {isComposeOpen && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={() => { setIsComposeOpen(false); setNewPostPosition(null); }} />
+            <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={() => { setIsComposeOpen(false); setNewPostPosition(null); setImageFile(null); }} />
             <motion.div 
               variants={modalVariants} initial="hidden" animate="show" exit="exit"
               className="bg-stone-100 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl relative z-10"
@@ -303,7 +329,7 @@ export default function Wall() {
             >
               <div className="p-4 border-b border-stone-200 flex justify-between items-center bg-white">
                 <h3 className="font-bold text-stone-800">Écrire sur le mur</h3>
-                <button onClick={() => { setIsComposeOpen(false); setNewPostPosition(null); }} className="p-2 bg-stone-100 rounded-full hover:bg-stone-200"><X size={18} /></button>
+                <button onClick={() => { setIsComposeOpen(false); setNewPostPosition(null); setImageFile(null); }} className="p-2 bg-stone-100 rounded-full hover:bg-stone-200"><X size={18} /></button>
               </div>
               
               {!session ? (
@@ -326,16 +352,56 @@ export default function Wall() {
                       </button>
                     ))}
                   </div>
+                  
                   <textarea 
                     value={newPostContent}
                     onChange={(e) => setNewPostContent(e.target.value)}
                     placeholder="Message, blague, info... Les emojis sont les bienvenus !"
-                    className="w-full h-32 p-4 rounded-2xl bg-white border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-stone-400 font-medium text-stone-800"
+                    className="w-full h-24 p-4 rounded-2xl bg-white border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-stone-400 font-medium text-stone-800"
                     maxLength={200}
-                    required
                   />
-                  <button type="submit" className="w-full bg-stone-800 text-white font-bold py-3.5 rounded-xl hover:bg-stone-700 transition-all flex items-center justify-center gap-2">
-                    <Send size={18} /> Épingler ici
+
+                  {/* Input caché pour l'image */}
+                  <input 
+                    type="file" 
+                    accept="image/*,image/gif"
+                    className="hidden" 
+                    ref={fileInputRef}
+                    onChange={handleImageSelect}
+                  />
+
+                  {/* Zone d'aperçu ou bouton d'ajout d'image */}
+                  {imageFile ? (
+                    <div className="relative w-full h-24 bg-stone-200 rounded-xl overflow-hidden border border-stone-300">
+                      <img src={URL.createObjectURL(imageFile)} alt="Aperçu" className="w-full h-full object-cover opacity-50" />
+                      <div className="absolute inset-0 flex items-center justify-between px-4">
+                        <span className="text-sm font-bold text-stone-800 bg-white/80 px-2 py-1 rounded">{imageFile.name}</span>
+                        <button type="button" onClick={() => setImageFile(null)} className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:text-stone-700 hover:border-stone-400 hover:bg-stone-200/50 transition-colors"
+                    >
+                      <ImagePlus size={18} />
+                      <span className="text-sm font-bold">Ajouter une image ou un GIF</span>
+                    </button>
+                  )}
+
+                  <button 
+                    type="submit" 
+                    disabled={isUploading || (!newPostContent.trim() && !imageFile)}
+                    className="w-full bg-stone-800 text-white font-bold py-3.5 rounded-xl hover:bg-stone-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploading ? (
+                      <><Loader2 size={18} className="animate-spin" /> Envoi en cours...</>
+                    ) : (
+                      <><Send size={18} /> Épingler ici</>
+                    )}
                   </button>
                 </form>
               )}
@@ -344,16 +410,17 @@ export default function Wall() {
         )}
       </AnimatePresence>
 
+      {/* MODALE : Voir un Post-it et les commentaires */}
       <AnimatePresence>
         {selectedPost && (
           <div className="absolute inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
             <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={() => setSelectedPost(null)} />
             <motion.div 
               variants={modalVariants} initial="hidden" animate="show" exit="exit"
-              className="bg-white w-full max-w-md h-[85vh] md:h-[600px] rounded-t-3xl md:rounded-3xl shadow-2xl relative z-10 flex flex-col"
+              className="bg-white w-full max-w-md h-[85vh] md:h-[600px] md:max-h-[85vh] rounded-t-3xl md:rounded-3xl shadow-2xl relative z-10 flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className={`p-6 md:rounded-t-3xl shrink-0 border-b border-black/5 ${getCategoryStyles(selectedPost.categorie)}`}>
+              <div className={`p-6 md:rounded-t-3xl shrink-0 border-b border-black/5 ${getCategoryStyles(selectedPost.categorie)} overflow-y-auto max-h-[50%]`}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="text-xs font-black uppercase tracking-widest opacity-60 text-stone-900">{selectedPost.categorie}</div>
                   <div className="flex items-center gap-2">
@@ -365,7 +432,16 @@ export default function Wall() {
                     <button onClick={() => setSelectedPost(null)} className="p-1.5 bg-black/5 rounded-full hover:bg-black/10 transition-colors"><X size={18} className="text-stone-900" /></button>
                   </div>
                 </div>
+                
+                {/* Affichage de l'image en grand dans la modale */}
+                {selectedPost.image_url && (
+                  <div className="w-full mb-4 rounded-xl overflow-hidden border border-black/10">
+                    <img src={selectedPost.image_url} alt="Contenu" className="w-full h-auto max-h-48 object-contain bg-black/5" />
+                  </div>
+                )}
+                
                 <p className="text-lg font-medium whitespace-pre-wrap mb-4 text-stone-900">{selectedPost.contenu}</p>
+                
                 <div className="flex justify-between items-center text-sm font-bold opacity-75 text-stone-900">
                   <span>Par {authorsMap[selectedPost.email_auteur] || "Inconnu"}</span>
                   <button 
@@ -398,7 +474,7 @@ export default function Wall() {
                 )}
               </div>
 
-              <div className="p-4 bg-white border-t border-stone-100 md:rounded-b-3xl">
+              <div className="p-4 bg-white border-t border-stone-100 md:rounded-b-3xl shrink-0">
                 {!session ? (
                   <p className="text-xs text-center text-stone-500 bg-stone-100 py-3 rounded-xl">
                     Connecte-toi via le panneau Check-in pour commenter.

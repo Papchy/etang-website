@@ -1,5 +1,6 @@
 import { MapPin, Calendar, Tent, Camera, Navigation, Car, AlertCircle } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import WeatherWidget from "../components/WeatherWidget";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -46,7 +47,7 @@ export default function Home() {
       </motion.div>
 
       <div className="px-5 md:px-8 flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-8">
-        
+        <WeatherWidget />
         <motion.section 
           variants={itemVariants}
           className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl border border-white/40 dark:border-stone-700/40 transition-all duration-500 flex flex-col"
