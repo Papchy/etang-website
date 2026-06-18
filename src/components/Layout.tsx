@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { Home, MessageSquare, UserCheck, Moon, Sun, Users, ShoppingBasket } from "lucide-react"; // L'ERREUR ETAIT ICI (Ajout de ShoppingBasket)
+import { Home, MessageSquare, UserCheck, Moon, Sun, Users, ShoppingBasket, Fish } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
