@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { supabase } from "../lib/supabase";
-import { LogOut, CheckCircle2, CreditCard, CalendarDays, Send, Edit3, X, Receipt, Lock, Mail, Key } from "lucide-react";
+import { LogOut, CheckCircle2, CreditCard, CalendarDays, Send, Edit3, X, Receipt, Lock, Mail, Key, User } from "lucide-react";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -29,7 +29,8 @@ export default function CheckIn() {
   const [montant, setMontant] = useState("10");
   const [methode, setMethode] = useState("Lydia");
 
-  // Nouveaux états pour l'authentification par email
+  // États pour l'authentification par email
+  const [authName, setAuthName] = useState(""); // Nouveau champ pour le nom
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
@@ -99,12 +100,20 @@ export default function CheckIn() {
 
     try {
       if (isSignUp) {
+        // Création d'un avatar automatique basé sur le nom saisi
+        const generatedAvatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authName)}&backgroundColor=e7e5e4&textColor=1c1917`;
+        
         const { error } = await supabase.auth.signUp({
           email: authEmail,
           password: authPassword,
+          options: {
+            data: {
+              full_name: authName,
+              avatar_url: generatedAvatarUrl
+            }
+          }
         });
         if (error) throw error;
-        // Supabase connecte automatiquement l'utilisateur si la confirmation d'email est désactivée
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: authEmail,
@@ -140,10 +149,8 @@ export default function CheckIn() {
 
     try {
       const email = session.user.email;
-      // Si la personne s'est connectée par email, on crée un pseudo à partir de l'adresse
+      // On récupère le nom depuis les métadonnées (qui viennent soit de Google, soit de notre formulaire d'inscription manuel)
       const baseName = session.user.user_metadata?.full_name || email.split('@')[0];
-      
-      // Génération d'un avatar automatique si Google n'en fournit pas
       const avatarUrl = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${baseName}&backgroundColor=e7e5e4&textColor=1c1917`;
       
       let prenom = baseName;
@@ -222,6 +229,20 @@ export default function CheckIn() {
           <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Identification requise</h2>
           
           <form onSubmit={handleEmailAuth} className="w-full flex flex-col gap-3 max-w-xs">
+            {isSignUp && (
+              <div className="relative">
+                <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input 
+                  type="text" 
+                  placeholder="Ton prénom / pseudo"
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                  required={isSignUp}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 text-sm"
+                />
+              </div>
+            )}
+            
             <div className="relative">
               <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
               <input 
@@ -233,6 +254,7 @@ export default function CheckIn() {
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 text-sm"
               />
             </div>
+            
             <div className="relative">
               <Key size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
               <input 
